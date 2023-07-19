@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { REACTION_EMOJI } from '../../../lib/reactions';
+	import AddCommentForm from './AddCommentForm.svelte';
 	import AddReaction from './AddReaction.svelte';
 	import Replies from './Replies.svelte';
 
@@ -26,6 +27,10 @@
 			</button>{' '}
 		{/each}
 		<AddReaction />
+	</div>
+	<div class="add-comment-form">
+		<h2>Add your comment</h2>
+		<AddCommentForm />
 	</div>
 	<div class="comments">
 		<h2>Comments</h2>
