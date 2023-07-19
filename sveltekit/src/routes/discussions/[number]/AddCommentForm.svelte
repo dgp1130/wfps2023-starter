@@ -1,8 +1,8 @@
 <script lang="ts">
-    let text = "";
+	let text = '';
 
 	function submit() {
-        // TODO: submit to github.
+		// TODO: submit to github.
 		alert(text);
 	}
 </script>
@@ -13,7 +13,7 @@
 </form>
 
 <style>
-    .submit-button {
-        display: block;
-    }
+	.submit-button {
+		display: block;
+	}
 </style>
