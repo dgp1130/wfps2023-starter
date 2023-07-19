@@ -164,3 +164,30 @@ export async function getDiscussionComments(number: number): Promise<DiscussionC
 		bodyHTML: comment.node.bodyHTML
 	}));
 }
+
+export interface RepositoryInformation {
+	repositoryDescription: string;
+	readme: string;
+}
+
+export async function getRepositoryInformation(): Promise<RepositoryInformation> {
+	const information = await queryGraphQl(
+		`
+		query repoDetails($repoOwner: String!, $repoName: String!) { 
+			repository(owner:$repoOwner, name: $repoName) {
+			  description
+			  object(expression: "main:README.md") {
+				... on Blob {
+				  text
+				}
+			  }
+			}
+		  }
+	`
+	) as any;
+
+	return {
+		repositoryDescription: information.repository.description,
+		readme: information.repository.object.text,
+	};
+}

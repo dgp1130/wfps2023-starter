@@ -9,7 +9,7 @@
 
 <svelte:head>
 	<title>{discussion.title} - Discussions</title>
-	<meta name="description" content="WPFS 2023 Discussions" />
+	<meta name="description" content="WFPS 2023 Discussions" />
 </svelte:head>
 
 <section>
