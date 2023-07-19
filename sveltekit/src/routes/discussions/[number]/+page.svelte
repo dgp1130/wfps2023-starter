@@ -6,7 +6,7 @@
 
 	export let data;
 
-	$: ({ discussion, comments } = data);
+	$: ({ discussion, comments, startCursor,		endCursor,		hasPrevPage,		hasNextPage } = data);
 	$: currentReactions = discussion.reactionGroups.filter((group) => group.totalCount > 0);
 </script>
 
@@ -45,6 +45,12 @@
 			{/each}
 		</ul>
 	</div>
+	{#if hasPrevPage}
+		<a href="/discussions/{discussion.number}?cursor={startCursor}&dir=before">Previous</a>
+	{/if}
+	{#if hasNextPage}
+		<a href="/discussions/{discussion.number}?cursor={endCursor}&dir=after">Next</a>
+	{/if}
 </section>
 
 <style>

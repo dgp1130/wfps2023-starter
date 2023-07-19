@@ -73,10 +73,14 @@ export interface PaginatedDiscussions {
 
 export enum PaginationDir {
 	Before = 'before',
-	After = 'after',
+	After = 'after'
 }
 
-export async function getDiscussionList(limit: number, cursor: string | undefined, dir: PaginationDir): Promise<PaginatedDiscussions> {
+export async function getDiscussionList(
+	limit: number,
+	cursor: string | undefined,
+	dir: PaginationDir
+): Promise<PaginatedDiscussions> {
 	const body = await queryGraphQl(
 		`
 			query discussionList($repoOwner: String!, $repoName: String!, $first: Int, $last: Int, $before: String, $after: String) {
@@ -102,9 +106,7 @@ export async function getDiscussionList(limit: number, cursor: string | undefine
 				}
 			}
 		`,
-		dir === PaginationDir.Before
-			? { last: limit, before: cursor }
-			: { first: limit, after: cursor }
+		dir === PaginationDir.Before ? { last: limit, before: cursor } : { first: limit, after: cursor }
 	);
 
 	const discussions = (body as any).repository.discussions.edges;
@@ -120,7 +122,7 @@ export async function getDiscussionList(limit: number, cursor: string | undefine
 		startCursor: pageInfo.startCursor,
 		hasPrevPage: pageInfo.hasPreviousPage,
 		endCursor: pageInfo.endCursor,
-		hasNextPage: pageInfo.hasNextPage,
+		hasNextPage: pageInfo.hasNextPage
 	};
 }
 
@@ -176,13 +178,26 @@ export interface ReplyComment {
 	bodyHTML: string;
 }
 
-export async function getDiscussionComments(number: number): Promise<DiscussionComment[]> {
+export interface PaginatedComments {
+	comments: DiscussionComment[];
+	startCursor: string;
+	hasPrevPage: boolean;
+	endCursor: string;
+	hasNextPage: boolean;
+}
+
+export async function getDiscussionComments(
+	number: number,
+	limit: number,
+	cursor: string | undefined,
+	dir: PaginationDir
+): Promise<PaginatedComments> {
 	const body = await queryGraphQl(
 		`
-		query discussionComments($repoOwner: String!, $repoName: String!, $number: Int!) {
+		query discussionComments($repoOwner: String!, $repoName: String!, $number: Int!, $first: Int, $last: Int, $before: String, $after: String) {
 			repository(owner: $repoOwner, name: $repoName) {
 				discussion(number: $number) {
-					comments(last: 100) {
+					comments(first: $first, last: $last, before: $before, after: $after) {
 						edges {
 							node {
 								author {
@@ -191,34 +206,56 @@ export async function getDiscussionComments(number: number): Promise<DiscussionC
 								createdAt
 								bodyHTML
 								replies(last: 100) {
-									nodes {
-										author {
-											login
+									edges {
+										node {
+											author {
+												login
+											}
+											createdAt
+											bodyHTML
 										}
-										createdAt
-										bodyHTML
 									}
 								}
 							}
+						}
+						pageInfo {
+							startCursor
+							hasPreviousPage
+							endCursor
+							hasNextPage
 						}
 					}
 				}
 			}
 		}
 	`,
-		{ number }
+		{
+			number,
+			...(dir === PaginationDir.Before
+				? { last: limit, before: cursor }
+				: { first: limit, after: cursor })
+		}
 	);
-	const comments = (body as any).repository.discussion.comments.edges;
-	return comments.map((comment: any) => ({
-		author: comment.node.author.login,
-		createdAt: comment.node.createdAt,
-		bodyHTML: comment.node.bodyHTML,
-		replies: comment.node.replies.nodes.map((reply: any) => ({
-			createdAt: reply.createdAt,
-			bodyHTML: reply.bodyHTML,
-			author: reply.author.login
-		}))
-	}));
+	const {
+		comments: { edges, pageInfo }
+	} = (body as any).repository.discussion;
+
+	return {
+		comments: edges.map(({ node }: any) => ({
+			author: node.author.login,
+			createdAt: node.createdAt,
+			bodyHTML: node.bodyHTML,
+			replies: node.replies.edges.map(({ node }: any) => ({
+				createdAt: node.createdAt,
+				bodyHTML: node.bodyHTML,
+				author: node.author.login
+			}))
+		})),
+		startCursor: pageInfo.startCursor,
+		endCursor: pageInfo.endCursor,
+		hasPrevPage: pageInfo.hasPreviousPage,
+		hasNextPage: pageInfo.hasNextPage
+	};
 }
 
 export interface RepositoryInformation {
@@ -227,9 +264,9 @@ export interface RepositoryInformation {
 }
 
 export async function getRepositoryInformation(): Promise<RepositoryInformation> {
-	const information = await queryGraphQl(
+	const information = (await queryGraphQl(
 		`
-		query repoDetails($repoOwner: String!, $repoName: String!) { 
+		query repoDetails($repoOwner: String!, $repoName: String!) {
 			repository(owner:$repoOwner, name: $repoName) {
 			  descriptionHTML
 			  object(expression: "main:README.md") {
@@ -240,31 +277,33 @@ export async function getRepositoryInformation(): Promise<RepositoryInformation>
 			}
 		  }
 	`
-	) as any;
+	)) as any;
 
 	return {
 		repositoryDescription: information.repository.descriptionHTML,
-		readme: marked(information.repository.object.text),
+		readme: marked(information.repository.object.text)
 	};
 }
 
 export async function exchangeOauthCodeForToken(code: string): Promise<string> {
-  const auth = createAppAuth({
-    appId: GITHUB_APP_ID,
-    privateKey: GITHUB_KEY,
-    clientId: GITHUB_CLIENT_ID,
-    clientSecret: GITHUB_CLIENT_SECRET,
-  });
-  const userAuth = await auth({type: 'oauth-user', code});
-  return userAuth.token;
+	const auth = createAppAuth({
+		appId: GITHUB_APP_ID,
+		privateKey: GITHUB_KEY,
+		clientId: GITHUB_CLIENT_ID,
+		clientSecret: GITHUB_CLIENT_SECRET
+	});
+	const userAuth = await auth({ type: 'oauth-user', code });
+	return userAuth.token;
 }
 
 export async function getUsername(token: string): Promise<string> {
-  const octokit = new Octokit({auth: token});
-  try {
-    const {data: {login}} = await octokit.request('GET /user');
-    return login;
-  } catch (err: unknown) {
-    return '';
-  }
+	const octokit = new Octokit({ auth: token });
+	try {
+		const {
+			data: { login }
+		} = await octokit.request('GET /user');
+		return login;
+	} catch (err: unknown) {
+		return '';
+	}
 }
