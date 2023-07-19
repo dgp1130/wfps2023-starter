@@ -11,10 +11,9 @@
 
 <div class="text-column">
 	<h1>Repository Description</h1>
-
-	<p> {info.repositoryDescription}</p>
+	{@html info.repositoryDescription}
 
 	<h1>Repository Readme</h1>
-	<p>{info.readme}</p>
+	{@html info.readme}
 
 </div>

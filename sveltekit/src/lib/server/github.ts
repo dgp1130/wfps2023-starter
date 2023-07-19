@@ -1,6 +1,7 @@
 import { env } from '$env/dynamic/private';
 import { Octokit, App } from 'octokit';
 import { createAppAuth } from '@octokit/auth-app';
+import { marked } from 'marked';
 
 import GITHUB_KEY from '../../../.env.private-key.pem?raw';
 import type { REACTIONS } from '../reactions';
@@ -197,7 +198,7 @@ export async function getRepositoryInformation(): Promise<RepositoryInformation>
 		`
 		query repoDetails($repoOwner: String!, $repoName: String!) { 
 			repository(owner:$repoOwner, name: $repoName) {
-			  description
+			  descriptionHTML
 			  object(expression: "main:README.md") {
 				... on Blob {
 				  text
@@ -209,8 +210,8 @@ export async function getRepositoryInformation(): Promise<RepositoryInformation>
 	) as any;
 
 	return {
-		repositoryDescription: information.repository.description,
-		readme: information.repository.object.text,
+		repositoryDescription: information.repository.descriptionHTML,
+		readme: marked(information.repository.object.text),
 	};
 }
 
