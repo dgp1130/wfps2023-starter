@@ -2,21 +2,20 @@
 	import { page } from '$app/stores';
 	import logo from '$lib/images/svelte-logo.svg';
 	import github from '$lib/images/github.svg';
-        import { env } from '$env/dynamic/public';
-        import { onMount } from 'svelte';
+	import { env } from '$env/dynamic/public';
 
-        export let user: string|undefined;
+	export let user: string|undefined;
 
-        function handleAuthClick() {
-          if (user) {
-            document.cookie = 'token=;path=/;Max-Age=0';
-            window.location.reload();
-          } else {
-            document.cookie = `redirectUrl=${window.location.href};path=/`;
-            window.location.href = `https://github.com/login/oauth/authorize?client_id=${env.PUBLIC_GITHUB_CLIENT_ID}&allow_signup=false`;
-          }
-        }
-        const cornerIcon = user ? `https://github.com/${user}.png` : github;
+	function handleAuthClick() {
+		if (user) {
+			document.cookie = 'token=;path=/;Max-Age=0';
+			window.location.reload();
+		} else {
+			document.cookie = `redirectUrl=${window.location.href};path=/`;
+			window.location.href = `https://github.com/login/oauth/authorize?client_id=${env.PUBLIC_GITHUB_CLIENT_ID}&allow_signup=false`;
+		}
+	}
+	const cornerIcon = user ? `https://github.com/${user}.png` : github;
 </script>
 
 <header>
@@ -44,9 +43,9 @@
 	</nav>
 
 	<div class="corner">
-                <a on:click={handleAuthClick}>
-		  <img src={cornerIcon} alt="GitHub" />
-                </a>
+		<button on:click={handleAuthClick}>
+			<img src={cornerIcon} alt="GitHub" />
+		</button>
 	</div>
 </header>
 
@@ -61,20 +60,20 @@
 		height: 3em;
 	}
 
-	.corner a {
+	.corner a, .corner button {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		width: 100%;
 		height: 100%;
-                cursor: pointer;
+		cursor: pointer;
 	}
 
 	.corner img {
 		width: 2em;
 		height: 2em;
 		object-fit: contain;
-                border-radius: 50%;
+		border-radius: 50%;
 	}
 
 	nav {
@@ -139,5 +138,10 @@
 
 	a:hover {
 		color: var(--color-theme-1);
+	}
+
+	button {
+		background: none;
+		border: none;
 	}
 </style>

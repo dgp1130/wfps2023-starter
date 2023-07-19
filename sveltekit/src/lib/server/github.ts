@@ -179,7 +179,7 @@ export async function getDiscussionComments(number: number): Promise<DiscussionC
 		author: comment.node.author.login,
 		createdAt: comment.node.createdAt,
 		bodyHTML: comment.node.bodyHTML,
-		replies: comment.node.replies.nodes.map((reply) => ({
+		replies: comment.node.replies.nodes.map((reply: any) => ({
 			createdAt: reply.createdAt,
 			bodyHTML: reply.bodyHTML,
 			author: reply.author.login
