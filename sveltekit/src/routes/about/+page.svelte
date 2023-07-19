@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let data;
 
-	$: ({ info } = data);
+	$: ({ info, buildInfo } = data);
 </script>
 	
 <svelte:head>
@@ -16,4 +16,5 @@
 	<h1>Repository Readme</h1>
 	{@html info.readme}
 
+	<footer>{buildInfo}</footer>
 </div>
