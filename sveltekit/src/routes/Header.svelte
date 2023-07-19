@@ -44,9 +44,9 @@
 	</nav>
 
 	<div class="corner">
-		<a on:click={handleAuthClick}>
+		<button on:click={handleAuthClick}>
 			<img src={cornerIcon} alt="GitHub" />
-		</a>
+		</button>
 	</div>
 </header>
 
