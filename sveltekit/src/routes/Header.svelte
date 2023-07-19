@@ -12,7 +12,7 @@
             document.cookie = 'token=;path=/;Max-Age=0';
             window.location.reload();
           } else {
-            localStorage.setItem('redirectUrl', window.location.href);
+            document.cookie = `redirectUrl=${window.location.href};path=/`;
             window.location.href = `https://github.com/login/oauth/authorize?client_id=${env.PUBLIC_GITHUB_CLIENT_ID}&allow_signup=false`;
           }
         }
