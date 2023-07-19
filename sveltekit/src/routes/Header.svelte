@@ -3,8 +3,9 @@
 	import logo from '$lib/images/svelte-logo.svg';
 	import github from '$lib/images/github.svg';
 	import { env } from '$env/dynamic/public';
+	import { onMount } from 'svelte';
 
-	export let user: string|undefined;
+	export let user: string | undefined;
 
 	function handleAuthClick() {
 		if (user) {
@@ -60,7 +61,8 @@
 		height: 3em;
 	}
 
-	.corner a, .corner button {
+	.corner a,
+	.corner button {
 		display: flex;
 		align-items: center;
 		justify-content: center;

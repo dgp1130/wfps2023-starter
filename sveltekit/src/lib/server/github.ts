@@ -63,32 +63,65 @@ export interface DiscussionDetails extends Discussion {
 	bodyHTML: string;
 }
 
-export async function getDiscussionList(): Promise<Discussion[]> {
-	const body = await queryGraphQl(`
-		query discussionList($repoOwner: String!, $repoName: String!) {
-			repository(owner: $repoOwner, name: $repoName) {
-				discussions(last: 10) {
-					edges {
-						node {
-							number
-							title
-							author {
-								login
+export interface PaginatedDiscussions {
+	discussions: Discussion[];
+	startCursor: string;
+	hasPrevPage: boolean;
+	endCursor: string;
+	hasNextPage: boolean;
+}
+
+export enum PaginationDir {
+	Before = 'before',
+	After = 'after',
+}
+
+export async function getDiscussionList(limit: number, cursor: string | undefined, dir: PaginationDir): Promise<PaginatedDiscussions> {
+	const body = await queryGraphQl(
+		`
+			query discussionList($repoOwner: String!, $repoName: String!, $first: Int, $last: Int, $before: String, $after: String) {
+				repository(owner: $repoOwner, name: $repoName) {
+					discussions(first: $first, last: $last, before: $before, after: $after, orderBy: {field: CREATED_AT, direction: ASC}) {
+						edges {
+							node {
+								number
+								title
+								author {
+									login
+								}
+								createdAt
 							}
-							createdAt
+						}
+						pageInfo {
+							startCursor
+							hasPreviousPage
+							endCursor
+							hasNextPage
 						}
 					}
 				}
 			}
-		}
-	`);
+		`,
+		dir === PaginationDir.Before
+			? { last: limit, before: cursor }
+			: { first: limit, after: cursor }
+	);
+
 	const discussions = (body as any).repository.discussions.edges;
-	return discussions.map((discussion: any) => ({
-		number: discussion.node.number,
-		title: discussion.node.title,
-		author: discussion.node.author.login,
-		createdAt: discussion.node.createdAt
-	}));
+	const pageInfo = (body as any).repository.discussions.pageInfo;
+
+	return {
+		discussions: discussions.map((discussion: any) => ({
+			number: discussion.node.number,
+			title: discussion.node.title,
+			author: discussion.node.author.login,
+			createdAt: discussion.node.createdAt
+		})),
+		startCursor: pageInfo.startCursor,
+		hasPrevPage: pageInfo.hasPreviousPage,
+		endCursor: pageInfo.endCursor,
+		hasNextPage: pageInfo.hasNextPage,
+	};
 }
 
 export async function getDiscussionDetails(number: number): Promise<DiscussionDetails> {
