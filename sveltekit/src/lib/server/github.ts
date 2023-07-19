@@ -1,5 +1,6 @@
 import { env } from '$env/dynamic/private';
-import { App } from 'octokit';
+import { Octokit, App } from 'octokit';
+import { createAppAuth } from '@octokit/auth-app';
 
 import GITHUB_KEY from '../../../.env.private-key.pem?raw';
 import type { REACTIONS } from '../reactions';
@@ -132,6 +133,13 @@ export interface DiscussionComment {
 	author: string;
 	createdAt: string;
 	bodyHTML: string;
+	replies: ReplyComment[];
+}
+
+export interface ReplyComment {
+	author: string;
+	createdAt: string;
+	bodyHTML: string;
 }
 
 export async function getDiscussionComments(number: number): Promise<DiscussionComment[]> {
@@ -140,7 +148,7 @@ export async function getDiscussionComments(number: number): Promise<DiscussionC
 		query discussionComments($repoOwner: String!, $repoName: String!, $number: Int!) {
 			repository(owner: $repoOwner, name: $repoName) {
 				discussion(number: $number) {
-					comments(last: 10) {
+					comments(last: 100) {
 						edges {
 							node {
 								author {
@@ -148,6 +156,15 @@ export async function getDiscussionComments(number: number): Promise<DiscussionC
 								}
 								createdAt
 								bodyHTML
+								replies(last: 100) {
+									nodes {
+										author {
+											login
+										}
+										createdAt
+										bodyHTML
+									}
+								}
 							}
 						}
 					}
@@ -161,7 +178,12 @@ export async function getDiscussionComments(number: number): Promise<DiscussionC
 	return comments.map((comment: any) => ({
 		author: comment.node.author.login,
 		createdAt: comment.node.createdAt,
-		bodyHTML: comment.node.bodyHTML
+		bodyHTML: comment.node.bodyHTML,
+		replies: comment.node.replies.nodes.map((reply) => ({
+			createdAt: reply.createdAt,
+			bodyHTML: reply.bodyHTML,
+			author: reply.author.login
+		}))
 	}));
 }
 
@@ -190,4 +212,23 @@ export async function getRepositoryInformation(): Promise<RepositoryInformation>
 		repositoryDescription: information.repository.description,
 		readme: information.repository.object.text,
 	};
+export async function exchangeOauthCodeForToken(code: string): Promise<string> {
+  const auth = createAppAuth({
+    appId: GITHUB_APP_ID,
+    privateKey: GITHUB_KEY,
+    clientId: GITHUB_CLIENT_ID,
+    clientSecret: GITHUB_CLIENT_SECRET,
+  });
+  const userAuth = await auth({type: 'oauth-user', code});
+  return userAuth.token;
+}
+
+export async function getUsername(token: string): Promise<string> {
+  const octokit = new Octokit({auth: token});
+  try {
+    const {data: {login}} = await octokit.request('GET /user');
+    return login;
+  } catch (err: unknown) {
+    return '';
+  }
 }

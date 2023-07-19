@@ -5,7 +5,7 @@ import {
 	type DiscussionDetails,
 	getDiscussionComments,
 	getDiscussionDetails
-} from '../../../lib/server/github';
+} from '$lib/server/github';
 
 import type { PageServerLoad } from './$types';
 

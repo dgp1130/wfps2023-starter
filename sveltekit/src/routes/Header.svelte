@@ -1,7 +1,22 @@
-<script>
+<script lang="ts">
 	import { page } from '$app/stores';
 	import logo from '$lib/images/svelte-logo.svg';
 	import github from '$lib/images/github.svg';
+        import { env } from '$env/dynamic/public';
+        import { onMount } from 'svelte';
+
+        export let user;
+
+        function handleAuthClick() {
+          if (user) {
+            document.cookie = 'token=;path=/;Max-Age=0';
+            window.location.reload();
+          } else {
+            document.cookie = `redirectUrl=${window.location.href};path=/`;
+            window.location.href = `https://github.com/login/oauth/authorize?client_id=${env.PUBLIC_GITHUB_CLIENT_ID}&allow_signup=false`;
+          }
+        }
+        const cornerIcon = user ? `https://github.com/${user}.png` : github;
 </script>
 
 <header>
@@ -29,9 +44,9 @@
 	</nav>
 
 	<div class="corner">
-		<a href="https://github.com/sveltejs/kit">
-			<img src={github} alt="GitHub" />
-		</a>
+                <a on:click={handleAuthClick} href='javascript:'>
+		  <img src={cornerIcon} alt="GitHub" />
+                </a>
 	</div>
 </header>
 
@@ -58,6 +73,7 @@
 		width: 2em;
 		height: 2em;
 		object-fit: contain;
+                border-radius: 50%;
 	}
 
 	nav {
