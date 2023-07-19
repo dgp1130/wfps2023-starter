@@ -133,6 +133,13 @@ export interface DiscussionComment {
 	author: string;
 	createdAt: string;
 	bodyHTML: string;
+	replies: ReplyComment[];
+}
+
+export interface ReplyComment {
+	author: string;
+	createdAt: string;
+	bodyHTML: string;
 }
 
 export async function getDiscussionComments(number: number): Promise<DiscussionComment[]> {
@@ -141,7 +148,7 @@ export async function getDiscussionComments(number: number): Promise<DiscussionC
 		query discussionComments($repoOwner: String!, $repoName: String!, $number: Int!) {
 			repository(owner: $repoOwner, name: $repoName) {
 				discussion(number: $number) {
-					comments(last: 10) {
+					comments(last: 100) {
 						edges {
 							node {
 								author {
@@ -149,6 +156,15 @@ export async function getDiscussionComments(number: number): Promise<DiscussionC
 								}
 								createdAt
 								bodyHTML
+								replies(last: 100) {
+									nodes {
+										author {
+											login
+										}
+										createdAt
+										bodyHTML
+									}
+								}
 							}
 						}
 					}
@@ -162,7 +178,12 @@ export async function getDiscussionComments(number: number): Promise<DiscussionC
 	return comments.map((comment: any) => ({
 		author: comment.node.author.login,
 		createdAt: comment.node.createdAt,
-		bodyHTML: comment.node.bodyHTML
+		bodyHTML: comment.node.bodyHTML,
+		replies: comment.node.replies.nodes.map((reply) => ({
+			createdAt: reply.createdAt,
+			bodyHTML: reply.bodyHTML,
+			author: reply.author.login
+		}))
 	}));
 }
 
