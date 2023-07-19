@@ -6,8 +6,8 @@ export interface Data {
 }
 
 export const load = async ({url, cookies}): Promise<Data> => {
-  const redirectUrl = cookies.get('redirectUrl');
-  const token = await exchangeOauthCodeForToken(url.searchParams.get('code'));
+  const redirectUrl = cookies.get('redirectUrl')!;
+  const token = await exchangeOauthCodeForToken(url.searchParams.get('code')!);
   cookies.set('token', token, {path: '/', httpOnly: false});
   cookies.delete('redirectUrl');
   throw redirect(307, redirectUrl);

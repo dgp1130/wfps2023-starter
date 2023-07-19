@@ -5,7 +5,7 @@
         import { env } from '$env/dynamic/public';
         import { onMount } from 'svelte';
 
-        export let user;
+        export let user: string|undefined;
 
         function handleAuthClick() {
           if (user) {
@@ -44,7 +44,7 @@
 	</nav>
 
 	<div class="corner">
-                <a on:click={handleAuthClick} href='javascript:'>
+                <a on:click={handleAuthClick}>
 		  <img src={cornerIcon} alt="GitHub" />
                 </a>
 	</div>
@@ -67,6 +67,7 @@
 		justify-content: center;
 		width: 100%;
 		height: 100%;
+                cursor: pointer;
 	}
 
 	.corner img {
