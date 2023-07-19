@@ -63,8 +63,11 @@ export interface DiscussionDetails extends Discussion {
 	bodyHTML: string;
 }
 
-export interface PaginatedDiscussions {
+export interface PaginatedDiscussions extends PaginationData {
 	discussions: Discussion[];
+}
+
+export interface PaginationData {
 	startCursor: string;
 	hasPrevPage: boolean;
 	endCursor: string;
@@ -178,12 +181,8 @@ export interface ReplyComment {
 	bodyHTML: string;
 }
 
-export interface PaginatedComments {
+export interface PaginatedComments extends PaginationData {
 	comments: DiscussionComment[];
-	startCursor: string;
-	hasPrevPage: boolean;
-	endCursor: string;
-	hasNextPage: boolean;
 }
 
 export async function getDiscussionComments(

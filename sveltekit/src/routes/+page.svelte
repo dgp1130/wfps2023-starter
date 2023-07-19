@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Paginator from '$lib/Paginator.svelte';
+
 	export let data;
 </script>
 
@@ -16,13 +18,8 @@
 				<p>by {discussion.author} on {discussion.createdAt}</p>
 			</li>
 		{/each}
-		{#if data.hasPrevPage}
-			<a href="/?cursor={data.startCursor}&dir=before">Previous</a>
-		{/if}
-		{#if data.hasNextPage}
-			<a href="/?cursor={data.endCursor}&dir=after">Next</a>
-		{/if}
 	</ol>
+	<Paginator {data} />
 </section>
 
 <style>

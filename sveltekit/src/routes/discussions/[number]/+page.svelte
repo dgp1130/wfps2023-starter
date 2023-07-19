@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Paginator from '$lib/Paginator.svelte';
 	import { REACTION_EMOJI } from '../../../lib/reactions';
 	import AddCommentForm from './AddCommentForm.svelte';
 	import AddReaction from './AddReaction.svelte';
@@ -6,7 +7,7 @@
 
 	export let data;
 
-	$: ({ discussion, comments, startCursor,		endCursor,		hasPrevPage,		hasNextPage } = data);
+	$: ({ discussion, comments } = data);
 	$: currentReactions = discussion.reactionGroups.filter((group) => group.totalCount > 0);
 </script>
 
@@ -45,12 +46,7 @@
 			{/each}
 		</ul>
 	</div>
-	{#if hasPrevPage}
-		<a href="/discussions/{discussion.number}?cursor={startCursor}&dir=before">Previous</a>
-	{/if}
-	{#if hasNextPage}
-		<a href="/discussions/{discussion.number}?cursor={endCursor}&dir=after">Next</a>
-	{/if}
+	<Paginator {data} />
 </section>
 
 <style>
