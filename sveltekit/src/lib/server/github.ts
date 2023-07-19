@@ -212,6 +212,8 @@ export async function getRepositoryInformation(): Promise<RepositoryInformation>
 		repositoryDescription: information.repository.description,
 		readme: information.repository.object.text,
 	};
+}
+
 export async function exchangeOauthCodeForToken(code: string): Promise<string> {
   const auth = createAppAuth({
     appId: GITHUB_APP_ID,
