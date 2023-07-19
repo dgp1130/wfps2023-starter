@@ -1,5 +1,6 @@
 import { env } from '$env/dynamic/private';
-import { App } from 'octokit';
+import { Octokit, App } from 'octokit';
+import { createAppAuth } from '@octokit/auth-app';
 
 import GITHUB_KEY from '../../../.env.private-key.pem?raw';
 import type { REACTIONS } from '../reactions';
@@ -163,4 +164,25 @@ export async function getDiscussionComments(number: number): Promise<DiscussionC
 		createdAt: comment.node.createdAt,
 		bodyHTML: comment.node.bodyHTML
 	}));
+}
+
+export async function exchangeOauthCodeForToken(code: string): Promise<string> {
+  const auth = createAppAuth({
+    appId: GITHUB_APP_ID,
+    privateKey: GITHUB_KEY,
+    clientId: GITHUB_CLIENT_ID,
+    clientSecret: GITHUB_CLIENT_SECRET,
+  });
+  const userAuth = await auth({type: 'oauth-user', code});
+  return userAuth.token;
+}
+
+export async function getUsername(token: string): Promise<string> {
+  const octokit = new Octokit({auth: token});
+  try {
+    const {data: {login}} = await octokit.request('GET /user');
+    return login;
+  } catch (err: unknown) {
+    return '';
+  }
 }
