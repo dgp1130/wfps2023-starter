@@ -74,6 +74,7 @@ export interface DiscussionDetails extends Discussion {
 }
 
 export interface PaginatedDiscussions extends PaginationData {
+  totalCount: number;
   discussions: Discussion[];
 }
 
@@ -98,7 +99,7 @@ export async function getDiscussionList(
     `
       query discussionList($repoOwner: String!, $repoName: String!, $first: Int, $last: Int, $before: String, $after: String) {
         repository(owner: $repoOwner, name: $repoName) {
-          discussions(first: $first, last: $last, before: $before, after: $after, orderBy: {field: CREATED_AT, direction: ASC}) {
+          discussions(first: $first, last: $last, before: $before, after: $after, orderBy: {field: CREATED_AT, direction: DESC}) {
             totalCount
             edges {
               node {
@@ -133,6 +134,7 @@ export async function getDiscussionList(
       author: discussion.node.author.login,
       createdAt: discussion.node.createdAt
     })),
+    totalCount: (body as any).repository.discussions.totalCount,
     startCursor: pageInfo.startCursor,
     hasPrevPage: pageInfo.hasPreviousPage,
     endCursor: pageInfo.endCursor,
