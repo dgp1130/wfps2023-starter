@@ -2,7 +2,7 @@ import { exchangeOauthCodeForToken } from '$lib/server/github';
 import { redirect } from '@sveltejs/kit';
 
 export interface Data {
-	token: string;
+  token: string;
 }
 
 export const load = async ({url, cookies}): Promise<Data> => {
