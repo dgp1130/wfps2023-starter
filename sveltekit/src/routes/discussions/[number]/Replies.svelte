@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type {  ReplyComment } from "$lib/server/github";
+  import type {  ReplyComment } from "$lib/server/github";
 
   export let replies: ReplyComment[];
 </script>

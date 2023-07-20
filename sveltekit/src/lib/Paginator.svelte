@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PaginationData } from "./server/github";
+  import type { PaginationData } from "./server/github";
   import { page } from '$app/stores';
 
   export let data: PaginationData;

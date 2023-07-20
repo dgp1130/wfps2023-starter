@@ -3,7 +3,7 @@ import { getUsername } from '$lib/server/github';
 import type { Cookies } from '@sveltejs/kit';
 
 export interface Data {
-	user: string;
+  user: string;
 }
 
 export const load = async ({cookies}) => {
