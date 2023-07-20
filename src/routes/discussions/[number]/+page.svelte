@@ -31,7 +31,7 @@
   </div>
   <div class="add-comment-form">
     <h2>Add your comment</h2>
-    <AddCommentForm />
+    <AddCommentForm discussionNumber={discussion.number} discussionId={discussion.id}/>
   </div>
   <div class="comments">
     <h2>Comments</h2>

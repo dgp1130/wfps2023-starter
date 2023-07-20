@@ -34,16 +34,20 @@ async function getGitHubPrivateKey(): Promise<string> {
   return env['GITHUB_PRIVATE_KEY'] ?? await fs.readFile('.env.private-key.pem', 'utf-8');
 }
 
-async function queryGraphQl(query: string, variables?: QueryVariables): Promise<unknown> {
+async function getOctokit(token?: string): Promise<Octokit> {
+  console.log(`token: ${token}`);
+  if (token) return new Octokit({ auth: token });
   const gitHubPrivateKey = await getGitHubPrivateKey();
-
   const app = new App({
     appId: GITHUB_APP_ID,
     privateKey: gitHubPrivateKey,
-    oauth: { clientId: GITHUB_CLIENT_ID, clientSecret: GITHUB_CLIENT_SECRET }
+    clientSecret: GITHUB_CLIENT_SECRET,
   });
-  const octokit = await app.getInstallationOctokit(GITHUB_INSTALLATION_ID);
+  return await app.getInstallationOctokit(GITHUB_INSTALLATION_ID);
+}
 
+async function queryGraphQl(query: string, variables?: QueryVariables, token?: string): Promise<unknown> {
+  const octokit = await getOctokit(token);
   return await octokit.graphql(
     query,
     Object.assign(
@@ -70,6 +74,7 @@ export interface ReactionGroup {
 
 export interface DiscussionDetails extends Discussion {
   reactionGroups: ReactionGroup[];
+  id: string;
   bodyHTML: string;
 }
 
@@ -148,6 +153,7 @@ export async function getDiscussionDetails(number: number): Promise<DiscussionDe
     query discussionDetails($repoOwner: String!, $repoName: String!, $number: Int!) {
       repository(owner: $repoOwner, name: $repoName) {
         discussion(number: $number) {
+          id
           number
           title
           author {
@@ -169,6 +175,7 @@ export async function getDiscussionDetails(number: number): Promise<DiscussionDe
   );
   const discussion = (body as any).repository.discussion;
   return {
+    id: discussion.id,
     number: discussion.number,
     title: discussion.title,
     author: discussion.author.login,
@@ -320,4 +327,18 @@ export async function getUsername(token: string): Promise<string> {
   } catch (err: unknown) {
     return '';
   }
+}
+
+export async function postComment(token: string, body: string, discussionId: string, replyTo?: string): Promise<void> {
+  const params: {[key: string]: unknown} = {body, discussionId};
+  if (replyTo) params.replyTo = replyTo;
+  await queryGraphQl(`
+    mutation addComment($body: String!, $discussionId: ID!, $replyTo: ID) {
+      addDiscussionComment(input: {body: $body, discussionId: $discussionId, replyToId: $replyTo}) {
+        comment {
+          id
+        }
+      }
+    }
+  `, params, token);
 }
