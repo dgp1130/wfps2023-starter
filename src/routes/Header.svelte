@@ -3,7 +3,6 @@
   import logo from '$lib/images/svelte-logo.svg';
   import github from '$lib/images/github.svg';
   import { env } from '$env/dynamic/public';
-  import { onMount } from 'svelte';
 
   export let user: string | undefined;
   export let clientId: string;
