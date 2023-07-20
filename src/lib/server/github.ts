@@ -329,16 +329,27 @@ export async function getUsername(token: string): Promise<string> {
   }
 }
 
-export async function postComment(token: string, body: string, discussionId: string, replyTo?: string): Promise<void> {
+export async function postComment(token: string, body: string, discussionId: string, replyTo?: string): Promise<DiscussionComment> {
   const params: {[key: string]: unknown} = {body, discussionId};
   if (replyTo) params.replyTo = replyTo;
-  await queryGraphQl(`
+  const information = await queryGraphQl(`
     mutation addComment($body: String!, $discussionId: ID!, $replyTo: ID) {
       addDiscussionComment(input: {body: $body, discussionId: $discussionId, replyToId: $replyTo}) {
         comment {
-          id
+          author {
+            login
+          }
+          createdAt
+          bodyHTML
         }
       }
     }
-  `, params, token);
+  `, params, token) as any;
+
+  return {
+    author: information.addDiscussionComment.comment.author.login,
+    bodyHTML: information.addDiscussionComment.comment.bodyHTML,
+    createdAt: information.addDiscussionComment.comment.createdAt,
+    replies: [],
+  };
 }
