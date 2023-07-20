@@ -3,7 +3,7 @@ import { Octokit, App } from 'octokit';
 import { createAppAuth } from '@octokit/auth-app';
 import { marked } from 'marked';
 
-import GITHUB_KEY from '../../../.env.private-key.pem?raw';
+import * as fs from 'fs/promises';
 import type { REACTIONS } from '../reactions';
 
 function requireEnv(key: string): string {
@@ -26,10 +26,20 @@ interface QueryVariables {
 	[name: string]: unknown;
 }
 
+/**
+ * Production deployment stores the private key in an environment variable.
+ * Local development uses a separate file.
+ */
+async function getGitHubPrivateKey(): Promise<string> {
+	return env['GITHUB_PRIVATE_KEY'] ?? await fs.readFile('.env.private-key.pem', 'utf-8');
+}
+
 async function queryGraphQl(query: string, variables?: QueryVariables): Promise<unknown> {
+	const gitHubPrivateKey = await getGitHubPrivateKey();
+
 	const app = new App({
 		appId: GITHUB_APP_ID,
-		privateKey: GITHUB_KEY,
+		privateKey: gitHubPrivateKey,
 		oauth: { clientId: GITHUB_CLIENT_ID, clientSecret: GITHUB_CLIENT_SECRET }
 	});
 	const octokit = await app.getInstallationOctokit(GITHUB_INSTALLATION_ID);
@@ -285,9 +295,11 @@ export async function getRepositoryInformation(): Promise<RepositoryInformation>
 }
 
 export async function exchangeOauthCodeForToken(code: string): Promise<string> {
+	const githubPrivateKey = await getGitHubPrivateKey();
+
 	const auth = createAppAuth({
 		appId: GITHUB_APP_ID,
-		privateKey: GITHUB_KEY,
+		privateKey: githubPrivateKey,
 		clientId: GITHUB_CLIENT_ID,
 		clientSecret: GITHUB_CLIENT_SECRET
 	});
