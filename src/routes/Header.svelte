@@ -6,6 +6,7 @@
   import { onMount } from 'svelte';
 
   export let user: string | undefined;
+  export let clientId: string;
 
   function handleAuthClick() {
     if (user) {
@@ -13,7 +14,7 @@
       window.location.reload();
     } else {
       document.cookie = `redirectUrl=${window.location.href};path=/`;
-      window.location.href = `https://github.com/login/oauth/authorize?client_id=${env.PUBLIC_GITHUB_CLIENT_ID}&allow_signup=false`;
+      window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&allow_signup=false`;
     }
   }
   const cornerIcon = user ? `https://github.com/${user}.png` : github;

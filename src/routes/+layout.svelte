@@ -5,7 +5,7 @@
 </script>
 
 <div class="app">
-  <Header user={data.user}/>
+  <Header user={data.user} clientId={data.clientId}/>
 
   <main>
     <slot />
