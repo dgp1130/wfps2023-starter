@@ -99,6 +99,7 @@ export async function getDiscussionList(
 			query discussionList($repoOwner: String!, $repoName: String!, $first: Int, $last: Int, $before: String, $after: String) {
 				repository(owner: $repoOwner, name: $repoName) {
 					discussions(first: $first, last: $last, before: $before, after: $after, orderBy: {field: CREATED_AT, direction: ASC}) {
+						totalCount
 						edges {
 							node {
 								number
@@ -284,7 +285,7 @@ export async function getRepositoryInformation(): Promise<RepositoryInformation>
 				}
 			  }
 			}
-		  }
+		}
 	`
 	)) as any;
 
