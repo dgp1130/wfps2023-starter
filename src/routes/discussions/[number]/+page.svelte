@@ -1,15 +1,11 @@
 <script lang="ts">
   import Paginator from '$lib/Paginator.svelte';
 	import type { DiscussionComment } from '$lib/server/github';
-  import { REACTION_EMOJI } from '../../../lib/reactions';
   import AddCommentForm from './AddCommentForm.svelte';
-  import AddReaction from './AddReaction.svelte';
-  import Replies from './Replies.svelte';
 
   export let data;
 
   $: ({ discussion, comments } = data);
-  $: currentReactions = discussion.reactionGroups.filter((group) => group.totalCount > 0);
 
   function addComment(evt: CustomEvent<DiscussionComment>): void {
     const comment = evt.detail;
@@ -26,15 +22,6 @@
   <h1>{discussion.title}</h1>
   <p>by {discussion.author} on {discussion.createdAt}</p>
   <div>{@html discussion.bodyHTML}</div>
-  <div class="reactions">
-    {#each currentReactions as group (group.content)}
-      <button disabled>
-        {REACTION_EMOJI[group.content]}
-        {group.totalCount}
-      </button>{' '}
-    {/each}
-    <AddReaction />
-  </div>
   <div class="add-comment-form">
     <h2>Add your comment</h2>
     <AddCommentForm
@@ -50,7 +37,6 @@
           {comment.author}
           {comment.createdAt}
           {@html comment.bodyHTML}
-          <Replies replies={comment.replies} />
         </li>
       {/each}
     </ul>
